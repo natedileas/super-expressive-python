@@ -1,10 +1,79 @@
-# import re
+import re
+
+__all__ = [
+    "ANY_CHAR",
+    "CARRIAGE_RETURN",
+    "DIGIT",
+    "END_OF_INPUT",
+    "NEWLINE",
+    "NON_DIGIT",
+    "NON_WHITESPACE_CHAR",
+    "NON_WORD",
+    "NON_WORD_BOUNDARY",
+    "NULL_BYTE",
+    "ONE_OR_MORE",
+    "ONE_OR_MORE_LAZY",
+    "OPTIONAL",
+    "START_OF_INPUT",
+    "TAB",
+    "WHITESPACE_CHAR",
+    "WORD",
+    "WORD_BOUNDARY",
+    "ZERO_OR_MORE",
+    "ZERO_OR_MORE_LAZY",
+    "any_of",
+    "any_of_chars",
+    "anything_but_chars",
+    "anything_but_range",
+    "anything_but_string",
+    "assert_ahead",
+    "assert_behind",
+    "assert_not_ahead",
+    "assert_not_behind",
+    "at_least",
+    "back_reference",
+    "between",
+    "capture",
+    "exactly",
+    "from_regex",
+    "group",
+    "named_back_reference",
+    "optional",
+    "range",
+    "re_flags_to_string",
+    "to_regex",
+]
 
 
-def to_regex(*args):
+def re_flags_to_string(flags):
+    possible_flags = {
+        re.ASCII: "a",
+        re.IGNORECASE: "i",
+        re.LOCALE: "L",
+        re.UNICODE: "u",
+        re.MULTILINE: "m",
+        re.DOTALL: "s",
+        re.VERBOSE: "x",
+    }
+
+    flagchrs = ""
+    for flagval, flagchr in possible_flags.items():
+        if flags & flagval:
+            flagchrs += flagchr
+
+    return f"(?{flagchrs})"
+
+
+def to_regex(*args, flags=0, flags_in_re=False):
     pattern = "".join(args)
+
+    if flags_in_re:
+        flagstring = re_flags_to_string(flags)
+        pattern = f"{flagstring}{pattern}"
+        return pattern
+
     # TODO compile or check for validity or something
-    return pattern
+    return re.compile(pattern, flags=flags)
 
 
 def from_regex(pattern):
@@ -118,59 +187,3 @@ ZERO_OR_MORE_LAZY = r"*?"
 OPTIONAL = r"?"
 START_OF_INPUT = r"^"
 END_OF_INPUT = r"$"
-# SPECIAL_CHARS = []
-
-"""
-flags:
-.allowMultipleMatches
-.lineByLine
-.caseInsensitive
-.sticky
-.unicode
-.singleLine
-
-special characters:
-.anyChar
-.whitespaceChar
-.nonWhitespaceChar
-.digit
-.nonDigit
-.word
-.nonWord
-.wordBoundary
-.nonWordBoundary
-.newline
-.carriageReturn
-.tab
-.nullByte
-.optional
-.zeroOrMore
-.zeroOrMoreLazy
-.oneOrMore
-.oneOrMoreLazy
-.startOfInput
-.endOfInput
-
-functions:
-.anyOf
-.capture
-.backreference(index)
-.namedBackreference(index)
-.group
-.assertAhead
-.assertNotAhead
-.assertBehind
-.assertNotBehind
-.exactly(n)
-.atLeast(n)
-.between(x, y)
-.betweenLazy(x, y)
-.anyOfChars(chars)
-.anythingButChars(chars)
-.anythingButString(str)
-.anythingButRange(a, b)
-.range(a, b)
-
-.toRegexString()
-
-"""
