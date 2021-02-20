@@ -134,13 +134,18 @@ stolen unapologetically from: https://stackoverflow.com/questions/36237477/pytho
 
 - x - license
 - x - read regex module, this just implements a better regex engine, not a better interface
-- in progress - docstrings / other documentation
+- x - docstrings / other documentation
+- x- rename `range()`  to something better
+- x- tests / check error messages
+    + make sure to do negative tests.
+- x - type hints
 - translate the javascript examples into the readme and make sure they work
 - inline flags
 - all special characters from re documentation
-- tests / check error messages
-    + make sure to do negative tests.
 - reverse mapping. this will probably be hard, because it's essentially writing a regex engine. 
 - pr to add my port to the readme of the original?
-- rename `range()`  to something better
 - think about whether the repitition specifiers should be terminal, or operate on their antecedent
+
+# 2/18/2021 - 2/19/2021 - Time to Clean
+
+

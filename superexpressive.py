@@ -3,6 +3,8 @@ This is a python port of super-expressive, a js library to make regular expressi
 
 """
 import re
+from typing import Union, List
+
 
 __all__ = [
     "ANY_CHAR",
@@ -49,8 +51,23 @@ __all__ = [
 ]
 
 
-def re_flags_to_string(flags):
-    """"""
+def re_flags_to_string(flags: int=0) -> str:
+    """
+    Turn a set of `re` flags into a string suitable for inclusion in a regex.
+
+    >>> import superexpressive as se
+    >>> se.re_flags_to_string(re.A)
+    '(?a)'
+
+    >>> import superexpressive as se
+    >>> se.re_flags_to_string(re.IGNORECASE | re.LOCALE)
+    '(?iL)'
+
+    >>> import superexpressive as se
+    >>> se.re_flags_to_string()
+    ''
+
+    """
     possible_flags = {
         re.ASCII: "a",
         re.IGNORECASE: "i",
@@ -69,8 +86,29 @@ def re_flags_to_string(flags):
     return f"(?{flagchrs})" if flagchrs else ""
 
 
-def to_regex(*args, flags=0, compile=True):
-    """Turn a collection of strings into a regex."""
+def to_regex(*args:List[str], flags:int=0, compile:bool=True) -> Union[str, re.compile]:
+    """ Turn a collection of strings into a regex. 
+
+    If compile is True, return a re.compile object. If false, return a regex 
+        string in the python style.
+
+    >>> import superexpressive as se
+    >>> se.to_regex(
+    ...     se.START_OF_INPUT,
+    ...     se.optional("0x"),
+    ...     se.capture(se.range(("a", "f"), ("A", "F"), ("0", "9")), se.exactly(4)),
+    ...     se.END_OF_INPUT,
+    ...     compile=False
+    ... )
+    '^(?:0x)?([a-fA-F0-9]{4})$'
+
+    >>> import superexpressive as se
+    >>> se.to_regex(compile=False)
+    ''
+
+    # TODO: More tests, like flags
+
+    """
     pattern = "".join(args)
 
     if compile:
@@ -81,27 +119,29 @@ def to_regex(*args, flags=0, compile=True):
         return pattern
 
 
-def from_regex(pattern):
+def from_regex(pattern:str) -> str:
     """it would be cool to be provide a "labeling" function which could generate
     the code from a given regex, as part of a debugging suite
     """
-    pass
+    raise NotImplementedError()
 
 
-def optional(*args):
+def optional(*args:List[str]) -> str:
     """A optional non-capturing group of the items inside.
 
-    >>> to_regex(optional(DIGIT), compile=False)
+    >>> import superexpressive as se
+    >>> se.optional(se.DIGIT)
     '(?:\\\\d)?'
 
     """
     return f'(?:{"".join(args)})?'
 
 
-def capture(*args, name=None):
+def capture(*args:List[str], name:Union[str,None]=None) -> str:
     """A group that captures its contents.
 
-    >>> to_regex(capture(range(("a", "f"), ("0", "9")), 'XXX'), compile=False)
+    >>> import superexpressive as se
+    >>> se.capture(se.range(("a", "f"), ("0", "9")), 'XXX')
     '([a-f0-9]XXX)'
 
     """
@@ -109,20 +149,22 @@ def capture(*args, name=None):
     return f'({name}{"".join(args)})'
 
 
-def group(*args):
+def group(*args:List[str]) -> str:
     """A group that does not capture its contents.
 
-    >>> to_regex(group(range(("a", "f"), ("0", "9")), 'XXX'), compile=False)
+    >>> import superexpressive as se
+    >>> se.group(se.range(("a", "f"), ("0", "9")), 'XXX')
     '(?:[a-f0-9]XXX)'
+
     """
     return f'(?:{"".join(args)})'
 
 
-def range(*args, negate=False):
+def range(*args:List[str], negate:bool=False) -> str:
     """An item that matches a range of characters by ascii code.
 
     >>> import superexpressive as se
-    >>> se.to_regex(se.range(('A', 'F')), compile=False)
+    >>> se.range(('A', 'F'))
     '[A-F]'
 
     """
@@ -138,61 +180,188 @@ def range(*args, negate=False):
     return f"[{negate}{character_set}]"
 
 
-def anything_but_range(*args):
+def anything_but_range(*args:List[str]) -> str:
+    """ An item that matches anything but a range of characters. 
+
+    >>> import superexpressive as se
+    >>> se.anything_but_range(('A', 'F'))
+    '[^A-F]'
+
+    """
     return range(*args, negate=True)
 
 
-def any_of_chars(*args):
+def any_of_chars(*args:List[str]) -> str:
+    """ A length 1 item that matches any of the included characters.
+
+    >>> import superexpressive as se
+    >>> se.any_of_chars('A', 'F', 'dkja')
+    '[AFdkja]'
+
+    """
+    # TODO uniq
     chars = "".join(args)
     return f"[{chars}]"
 
 
-def anything_but_chars(*args):
+def anything_but_chars(*args:List[str]) -> str:
+    """ A length 1 item that matches anything but the included characters.
+
+    >>> import superexpressive as se
+    >>> se.anything_but_chars('A', 'F', 'dkja')
+    '[^AFdkja]'
+
+    """
+    # TODO uniq
     chars = "".join(args)
     return f"[^{chars}]"
 
 
-def anything_but_string(string):
+def anything_but_string(string:str) -> str:
+    """ Match anything except the provided string.
+
+    >>> import superexpressive as se
+    >>> se.anything_but_string('test')
+    '(?:[^t][^e][^s][^t])'
+
+    """
     return group("".join(f"[^{c}]" for c in string))
 
 
-def exactly(length):
+def exactly(length:int) -> str:
+    """ Match the previous pattern exactly `length` times.
+
+    >>> import superexpressive as se
+    >>> se.exactly(4)
+    '{4}'
+    
+    >>> import superexpressive as se
+    >>> se.DIGIT + se.exactly(6)
+    '\\\\d{6}'
+
+    """
     return f"{{{length}}}"
 
 
-def at_least(length):
-    return f"{length},"
+def at_least(length:int) -> str:
+    """ Match the previous pattern at least `length` times, greedily.
+
+    >>> import superexpressive as se
+    >>> se.at_least(4)
+    '{4,}'
+    
+    >>> import superexpressive as se
+    >>> se.DIGIT + se.at_least(6)
+    '\\\\d{6,}'
+
+    """
+    return f"{{{length},}}"
 
 
-def between(minl, maxl):
-    return f"{minl},{maxl}"
+def between(minl:int, maxl:int) -> str:
+    """ Match the previous pattern at between `minl` and `maxl` times, greedily.
+
+    >>> import superexpressive as se
+    >>> se.between(4,8)
+    '{4,8}'
+    
+    >>> import superexpressive as se
+    >>> se.DIGIT + se.between(6,8)
+    '\\\\d{6,8}'
+    
+    """
+    return f"{{{minl},{maxl}}}"
 
 
-def any_of(*args):
+def any_of(*args:List[str]) -> str:
+    """ Match any of the given arguments.
+
+    >>> import superexpressive as se
+    >>> se.any_of('A', 'F', 'dkja')
+    '(?:A|F|dkja)'
+
+    # TODO: is a non-capturing group really neccesary here?
+    """
     return group("|".join(args))
 
 
-def back_reference(index):
+def back_reference(index:int) -> str:
+    """ Refer to an earlier captured group by 1-based index.
+
+    >>> import superexpressive as se
+    >>> se.back_reference(2)
+    '\\\\2'
+    
+    # TODO: actual example of using this
+
+    """
+    # TODO error handling 
     return f"\\{index}"
 
 
-def named_back_reference(name):
-    return f"\\k<{index}>"
+def named_back_reference(name:str) -> str:
+    """ Refer to an earlier captured group by name.
+
+    >>> import superexpressive as se
+    >>> se.named_back_reference('test')
+    '\\\\k<test>'
+    
+    # TODO: actual example of using this
+
+    """
+    # TODO error handling 
+    return f"\\k<{name}>"
 
 
-def assert_ahead(*args):
+def assert_ahead(*args:List[str]) -> str:
+    """ Check, but do not consume, that the regex matches the next part of the string.
+
+    >>> import superexpressive as se
+    >>> se.assert_ahead('test')
+    '(?=test)'
+    
+    # TODO: actual example of using this
+
+    """
     return f'(?={"".join(args)})'
 
 
-def assert_not_ahead(*args):
+def assert_not_ahead(*args:List[str]) -> str:
+    """ Check, but do not consume, that the regex does not match the next part of the string.
+
+    >>> import superexpressive as se
+    >>> se.assert_not_ahead('test')
+    '(?!test)'
+    
+    # TODO: actual example of using this
+
+    """
     return f'(?!{"".join(args)})'
 
 
-def assert_behind(*args):
+def assert_behind(*args:List[str]) -> str:
+    """ Check, that the regex matches the previous part of the string.
+
+    >>> import superexpressive as se
+    >>> se.assert_behind('test')
+    '(?<=test)'
+    
+    # TODO: actual example of using this
+
+    """
     return f'(?<={"".join(args)})'
 
 
-def assert_not_behind(*args):
+def assert_not_behind(*args:List[str]) -> str:
+    """ Check, that the regex does not match the previous part of the string.
+
+    >>> import superexpressive as se
+    >>> se.assert_not_behind('test')
+    '(?<!test)'
+    
+    # TODO: actual example of using this
+
+    """
     return f'(?<!{"".join(args)})'
 
 

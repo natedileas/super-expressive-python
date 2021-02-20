@@ -107,63 +107,318 @@ Non-greedy version of the zero or more match
 
 
 ### superexpressive.any_of(\*args)
+Match any of the given arguments.
+
+```python
+>>> import superexpressive as se
+>>> se.any_of('A', 'F', 'dkja')
+'(?:A|F|dkja)'
+```
+
+# TODO: is a non-capturing group really neccesary here?
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.any_of_chars(\*args)
+A length 1 item that matches any of the included characters.
+
+```python
+>>> import superexpressive as se
+>>> se.any_of_chars('A', 'F', 'dkja')
+'[AFdkja]'
+```
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.anything_but_chars(\*args)
+A length 1 item that matches anything but the included characters.
+
+```python
+>>> import superexpressive as se
+>>> se.anything_but_chars('A', 'F', 'dkja')
+'[^AFdkja]'
+```
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.anything_but_range(\*args)
+An item that matches anything but a range of characters.
+
+```python
+>>> import superexpressive as se
+>>> se.anything_but_range(('A', 'F'))
+'[^A-F]'
+```
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.anything_but_string(string)
+Match anything except the provided string.
+
+```python
+>>> import superexpressive as se
+>>> se.anything_but_string('test')
+'(?:[^t][^e][^s][^t])'
+```
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.assert_ahead(\*args)
+Check, but do not consume, that the regex matches the next part of the string.
+
+```python
+>>> import superexpressive as se
+>>> se.assert_ahead('test')
+'(?=test)'
+```
+
+# TODO: actual example of using this
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.assert_behind(\*args)
+Check, that the regex matches the previous part of the string.
+
+```python
+>>> import superexpressive as se
+>>> se.assert_behind('test')
+'(?<=test)'
+```
+
+# TODO: actual example of using this
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.assert_not_ahead(\*args)
+Check, but do not consume, that the regex does not match the next part of the string.
+
+```python
+>>> import superexpressive as se
+>>> se.assert_not_ahead('test')
+'(?!test)'
+```
+
+# TODO: actual example of using this
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.assert_not_behind(\*args)
+Check, that the regex does not match the previous part of the string.
+
+```python
+>>> import superexpressive as se
+>>> se.assert_not_behind('test')
+'(?<!test)'
+```
+
+# TODO: actual example of using this
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.at_least(length)
+Match the previous pattern at least length times, greedily.
+
+```python
+>>> import superexpressive as se
+>>> se.at_least(4)
+'{4,}'
+```
+
+```python
+>>> import superexpressive as se
+>>> se.DIGIT + se.at_least(6)
+'\\d{6,}'
+```
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.back_reference(index)
+Refer to an earlier captured group by 1-based index.
+
+```python
+>>> import superexpressive as se
+>>> se.back_reference(2)
+'\\2'
+```
+
+# TODO: actual example of using this
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.between(minl, maxl)
+Match the previous pattern at between minl and maxl times, greedily.
+
+```python
+>>> import superexpressive as se
+>>> se.between(4,8)
+'{4,8}'
+```
+
+```python
+>>> import superexpressive as se
+>>> se.DIGIT + se.between(6,8)
+'\\d{6,8}'
+```
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.capture(\*args, name=None)
 A group that captures its contents.
 
 ```python
->>> to_regex(capture(range(("a", "f"), ("0", "9")), 'XXX'), compile=False)
+>>> import superexpressive as se
+>>> se.capture(se.range(("a", "f"), ("0", "9")), 'XXX')
 '([a-f0-9]XXX)'
 ```
 
 
+* **Return type**
+
+    `str`
+
+
+
 ### superexpressive.exactly(length)
+Match the previous pattern exactly length times.
+
+```python
+>>> import superexpressive as se
+>>> se.exactly(4)
+'{4}'
+```
+
+```python
+>>> import superexpressive as se
+>>> se.DIGIT + se.exactly(6)
+'\\d{6}'
+```
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.from_regex(pattern)
 it would be cool to be provide a “labeling” function which could generate
 the code from a given regex, as part of a debugging suite
 
 
+* **Return type**
+
+    `str`
+
+
+
 ### superexpressive.group(\*args)
 A group that does not capture its contents.
 
 ```python
->>> to_regex(group(range(("a", "f"), ("0", "9")), 'XXX'), compile=False)
+>>> import superexpressive as se
+>>> se.group(se.range(("a", "f"), ("0", "9")), 'XXX')
 '(?:[a-f0-9]XXX)'
 ```
 
 
+* **Return type**
+
+    `str`
+
+
+
 ### superexpressive.named_back_reference(name)
+Refer to an earlier captured group by name.
+
+```python
+>>> import superexpressive as se
+>>> se.named_back_reference('test')
+'\\k<test>'
+```
+
+# TODO: actual example of using this
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.optional(\*args)
 A optional non-capturing group of the items inside.
 
 ```python
->>> to_regex(optional(DIGIT), compile=False)
+>>> import superexpressive as se
+>>> se.optional(se.DIGIT)
 '(?:\\d)?'
 ```
+
+
+* **Return type**
+
+    `str`
+
 
 
 ### superexpressive.range(\*args, negate=False)
@@ -171,12 +426,73 @@ An item that matches a range of characters by ascii code.
 
 ```python
 >>> import superexpressive as se
->>> se.to_regex(se.range(('A', 'F')), compile=False)
+>>> se.range(('A', 'F'))
 '[A-F]'
 ```
 
 
-### superexpressive.re_flags_to_string(flags)
+* **Return type**
+
+    `str`
+
+
+
+### superexpressive.re_flags_to_string(flags=0)
+Turn a set of re flags into a string suitable for inclusion in a regex.
+
+```python
+>>> import superexpressive as se
+>>> se.re_flags_to_string(re.A)
+'(?a)'
+```
+
+```python
+>>> import superexpressive as se
+>>> se.re_flags_to_string(re.IGNORECASE | re.LOCALE)
+'(?iL)'
+```
+
+```python
+>>> import superexpressive as se
+>>> se.re_flags_to_string()
+''
+```
+
+
+* **Return type**
+
+    `str`
+
+
 
 ### superexpressive.to_regex(\*args, flags=0, compile=True)
 Turn a collection of strings into a regex.
+
+If compile is True, return a re.compile object. If false, return a regex 
+
+    string in the python style.
+
+```python
+>>> import superexpressive as se
+>>> se.to_regex(
+...     se.START_OF_INPUT,
+...     se.optional("0x"),
+...     se.capture(se.range(("a", "f"), ("A", "F"), ("0", "9")), se.exactly(4)),
+...     se.END_OF_INPUT,
+...     compile=False
+... )
+'^(?:0x)?([a-fA-F0-9]{4})$'
+```
+
+```python
+>>> import superexpressive as se
+>>> se.to_regex(compile=False)
+''
+```
+
+# TODO: More tests, like flags
+
+
+* **Return type**
+
+    `Union`[`str`, `compile`]
